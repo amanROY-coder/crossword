@@ -1,0 +1,957 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DIET Crossword | Admin Panel</title>
+
+  <style>
+    :root {
+      --bg: #f5f3ff;
+      --card: #ffffff;
+      --text: #27264b;
+      --muted: #777694;
+      --purple: #8273e8;
+      --blue: #91bfff;
+      --border: #e9e6fa;
+      --green: #198754;
+      --red: #dc3545;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, #f5f0ff, #eaf4ff);
+      min-height: 100vh;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .hidden { display: none !important; }
+
+    .login-wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 410px;
+      padding: 32px;
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      background: white;
+      box-shadow: 0 18px 55px #7568b51a;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border-radius: 19px;
+      color: white;
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #8979ef, #78b9ff);
+      box-shadow: 0 7px 18px #8273e840;
+    }
+
+    h1 { font-size: 25px; margin: 17px 0 7px; }
+    h2 { font-size: 18px; margin: 0; }
+    p { color: var(--muted); line-height: 1.5; }
+    .sub { font-size: 13px; margin: 0 0 24px; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 14px 0 7px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      background: #fcfbff;
+      color: var(--text);
+    }
+
+    input:focus { border-color: var(--purple); }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 15px;
+      font-weight: 700;
+      transition: .2s;
+    }
+
+    .btn:hover { filter: brightness(.97); transform: translateY(-1px); }
+    .primary { color: white; background: linear-gradient(120deg, #8273e8, #79aefb); }
+    .soft { color: #6255c6; background: #f0edff; }
+    .danger { color: white; background: var(--red); }
+    .success { color: white; background: var(--green); }
+    .full { width: 100%; margin-top: 20px; }
+
+    #loginMessage, #notice {
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 235px minmax(0, 1fr);
+    }
+
+    aside {
+      background: #fff;
+      border-right: 1px solid var(--border);
+      padding: 25px 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-weight: 800;
+      font-size: 15px;
+      margin-bottom: 30px;
+    }
+
+    .brand .logo { width: 43px; height: 43px; border-radius: 14px; font-size: 20px; }
+
+    .nav-label {
+      color: #9996b4;
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      margin: 23px 10px 10px;
+      font-weight: 800;
+    }
+
+    .nav {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: 0;
+      background: transparent;
+      color: #686685;
+      text-align: left;
+      border-radius: 11px;
+      margin: 4px 0;
+      font-weight: 650;
+    }
+
+    .nav.active, .nav:hover { color: #6758ce; background: #f0edff; }
+
+    main { padding: 28px; min-width: 0; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    .topbar p { margin: 6px 0 0; font-size: 13px; }
+    .top-actions { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 30px;
+      padding: 7px 11px;
+      background: #eeebff;
+      color: #6758ce;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      min-width: 0;
+      padding: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 19px;
+      box-shadow: 0 7px 22px #6355a30b;
+    }
+
+    .stat-label { font-size: 12px; color: var(--muted); font-weight: 700; }
+    .stat-number { font-size: 30px; font-weight: 850; margin-top: 12px; }
+    .stat-icon { float: right; font-size: 23px; }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(270px, .8fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 17px;
+    }
+
+    .section-head p { font-size: 12px; margin: 5px 0 0; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: #faf9ff;
+      color: #777391;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    th, td {
+      padding: 13px 11px;
+      text-align: left;
+      border-bottom: 1px solid #f0eef8;
+      white-space: nowrap;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 800;
+      background: #f0edff;
+      color: #6758ce;
+    }
+
+    .status.done { background: #e4f8ec; color: #198754; }
+    .status.pending { background: #fff2d9; color: #976200; }
+    .status.closed { background: #ffe5e8; color: #b42332; }
+
+    .small-btn { padding: 7px 9px; border-radius: 9px; font-size: 11px; }
+    .control { margin-top: 15px; }
+    .control .btn { margin: 5px 5px 0 0; }
+    .timer {
+      font-size: 38px;
+      font-weight: 850;
+      letter-spacing: 1px;
+      margin: 20px 0 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-caption { font-size: 12px; color: var(--muted); }
+    .field-row { display: flex; gap: 10px; align-items: end; }
+    .field-row > div { flex: 1; min-width: 0; }
+    .field-row input { padding: 10px; }
+
+    .empty { padding: 28px 10px; text-align: center; color: var(--muted); }
+    #notice { margin: 0 0 15px; }
+    .mobile-brand { display: none; }
+
+    @media(max-width: 1050px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .section-grid { grid-template-columns: 1fr; }
+    }
+
+    @media(max-width: 720px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { border-right: 0; border-bottom: 1px solid var(--border); padding: 13px; }
+      .brand { margin-bottom: 10px; }
+      aside .nav-label { display: none; }
+      aside nav { display: flex; overflow-x: auto; gap: 5px; }
+      .nav { white-space: nowrap; width: auto; padding: 10px; }
+      main { padding: 17px; }
+      .stats { gap: 10px; }
+      .card { padding: 15px; }
+      .stat-number { font-size: 25px; }
+      .login-card { padding: 24px; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ADMIN LOGIN -->
+  <section id="loginScreen" class="login-wrap">
+    <div class="login-card">
+      <div class="logo">D</div>
+      <h1>Admin Login</h1>
+      <p class="sub">DIET Engineering Crossword Management</p>
+
+      <form id="loginForm">
+        <label for="email">Admin Email</label>
+        <input id="email" type="email" autocomplete="username"
+               placeholder="admin@example.com" required />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password"
+               placeholder="Enter admin password" required />
+
+        <button class="btn primary full" id="loginButton" type="submit">
+          Login to Dashboard
+        </button>
+      </form>
+      <p id="loginMessage"></p>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <div id="adminApp" class="layout hidden">
+    <aside>
+      <div class="brand">
+        <div class="logo">D</div>
+        <div>DIET Crossword<br><span style="color:#9290ae;font-size:11px">ADMIN PANEL</span></div>
+      </div>
+
+      <div class="nav-label">MAIN MENU</div>
+      <nav>
+        <button class="nav active" data-section="dashboard">▦ Dashboard</button>
+        <button class="nav" data-section="teams">♙ Team Management</button>
+        <button class="nav" data-section="game">▶ Game Control</button>
+        <button class="nav" data-section="results">🏆 Results & Leaderboard</button>
+      </nav>
+
+      <div class="nav-label">ACCOUNT</div>
+      <button class="nav" id="logoutButton">↪ Logout</button>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <h1 id="pageTitle" style="margin:0">Dashboard Overview</h1>
+          <p>Manage your crossword event in real time.</p>
+        </div>
+        <div class="top-actions">
+          <span class="pill" id="eventBadge">● Checking event…</span>
+          <button class="btn soft" id="refreshButton">↻ Refresh</button>
+        </div>
+      </div>
+
+      <p id="notice"></p>
+
+      <section id="dashboardSection">
+        <div class="stats">
+          <div class="card">
+            <span class="stat-icon">👥</span>
+            <div class="stat-label">TOTAL TEAMS</div>
+            <div class="stat-number" id="totalTeams">0</div>
+          </div>
+          <div class="card">
+            <span class="stat-icon">🏁</span>
+            <div class="stat-label">COMPLETED</div>
+            <div class="stat-number" id="completedTeams">0</div>
+          </div>
+          <div class="card">
+            <span class="stat-icon">⌛</span>
+            <div class="stat-label">PENDING</div>
+            <div class="stat-number" id="pendingTeams">0</div>
+          </div>
+          <div class="card">
+            <span class="stat-icon">⏱️</span>
+            <div class="stat-label">GAME TIMER</div>
+            <div class="stat-number" id="dashboardTimer">00:00</div>
+          </div>
+        </div>
+
+        <div class="section-grid">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Registered Teams</h2>
+                <p>Live data from your Firebase database</p>
+              </div>
+              <button class="btn soft" data-go="teams">View all</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Team</th><th>Status</th><th>Time</th></tr></thead>
+                <tbody id="recentTeams"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Quick Game Controls</h2>
+            <p style="font-size:12px">Control the event for all participants.</p>
+            <div class="control">
+              <button class="btn success" id="startButton">▶ Start Game</button>
+              <button class="btn soft" id="waitingButton">Ⅱ Waiting Mode</button>
+              <button class="btn danger" id="closeButton">■ Close Game</button>
+            </div>
+            <div class="timer" id="mainTimer">00:00</div>
+            <div class="timer-caption" id="timerCaption">Waiting for event status…</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="teamsSection" class="hidden">
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h2>Team Management</h2>
+              <p>Search teams, check progress, or remove a team.</p>
+            </div>
+            <div style="min-width:200px;max-width:300px;flex:1">
+              <input id="teamSearch" placeholder="Search team name…" />
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Team Name</th><th>Registration</th>
+                <th>Status</th><th>Completion Time</th><th>Action</th></tr>
+              </thead>
+              <tbody id="teamsTable"></tbody>
+            </table>
+          </div>
+          <div id="teamCount" class="timer-caption" style="margin-top:12px"></div>
+        </div>
+      </section>
+
+      <section id="gameSection" class="hidden">
+        <div class="section-grid">
+          <div class="card">
+            <h2>Game Control Center</h2>
+            <p>These controls update the Firestore event document.</p>
+            <div class="field-row">
+              <div>
+                <label for="durationMinutes">Game duration (minutes)</label>
+                <input id="durationMinutes" type="number" min="1" max="600" value="30" />
+              </div>
+            </div>
+            <div class="control">
+              <button class="btn success" id="startButton2">▶ Start / Restart</button>
+              <button class="btn soft" id="waitingButton2">Ⅱ Waiting Mode</button>
+              <button class="btn danger" id="closeButton2">■ Close Game</button>
+            </div>
+            <p style="font-size:12px">Starting again resets the game start time. Use this carefully.</p>
+          </div>
+
+          <div class="card">
+            <h2>Live Timer</h2>
+            <div class="timer" id="gameTimer">00:00</div>
+            <div class="timer-caption" id="gameTimerCaption">Not started</div>
+            <p style="font-size:12px">Timer is based on the event start timestamp saved in Firestore.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="resultsSection" class="hidden">
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h2>Leaderboard</h2>
+              <p>Completed teams sorted by recorded completion time.</p>
+            </div>
+            <button class="btn primary" id="exportButton">↓ Export CSV</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Rank</th><th>Team</th><th>Completion Time</th><th>Completed At</th></tr></thead>
+              <tbody id="leaderboardTable"></tbody>
+            </table>
+          </div>
+          <p style="font-size:12px">
+            Completion times appear only after the crossword game records them in each team's document.
+          </p>
+        </div>
+      </section>
+
+      <p style="text-align:center;font-size:11px;margin-top:28px">DIET Engineering Crossword · Admin Console</p>
+    </main>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import {
+      getFirestore, collection, doc, getDoc, getDocs, onSnapshot,
+      updateDoc, setDoc, deleteDoc, serverTimestamp, Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    // Use the same Firebase configuration as index.html and waiting.html.
+    const firebaseConfig = {
+      apiKey: "AIzaSyCKdwMtdNS1NeQdigvkni7XJUUNaP2VWoQ",
+      authDomain: "test-protal.firebaseapp.com",
+      projectId: "test-protal",
+      storageBucket: "test-protal.firebasestorage.app",
+      messagingSenderId: "168100330624",
+      appId: "1:168100330624:web:d9b3b1c050ce4ede7cfa65",
+      measurementId: "G-DNMJ64CY61"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const $ = id => document.getElementById(id);
+    let teams = [];
+    let eventData = {};
+    let unsubTeams = null;
+    let unsubEvent = null;
+    let timerInterval = null;
+    let isAdmin = false;
+
+    function notice(message, error = false) {
+      $("notice").textContent = message;
+      $("notice").style.color = error ? "#c62838" : "#198754";
+    }
+
+    function showLogin(message = "") {
+      $("loginScreen").classList.remove("hidden");
+      $("adminApp").classList.add("hidden");
+      $("loginMessage").textContent = message;
+    }
+
+    function showDashboard() {
+      $("loginScreen").classList.add("hidden");
+      $("adminApp").classList.remove("hidden");
+    }
+
+    function stopListeners() {
+      if (unsubTeams) unsubTeams();
+      if (unsubEvent) unsubEvent();
+      if (timerInterval) clearInterval(timerInterval);
+      unsubTeams = unsubEvent = timerInterval = null;
+    }
+
+    async function verifyAdmin(user) {
+      // Create this document manually in Firestore AFTER enabling admin login:
+      // admins/{your-auth-uid} => { role: "admin" }
+      const snap = await getDoc(doc(db, "admins", user.uid));
+      return snap.exists() && snap.data().role === "admin";
+    }
+
+    async function startAdminSession(user) {
+      stopListeners();
+      isAdmin = false;
+      try {
+        const allowed = await verifyAdmin(user);
+        if (!allowed) {
+          await signOut(auth);
+          showLogin("This account is not authorized as an admin. Ask the project owner to configure admins/" + user.uid + ".");
+          return;
+        }
+
+        isAdmin = true;
+        showDashboard();
+        notice("Admin login successful.");
+        listenForData();
+      } catch (error) {
+        console.error(error);
+        await signOut(auth);
+        showLogin("Admin verification failed. Check Firestore Security Rules and the admins document. " + error.message);
+      }
+    }
+
+    $("loginForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      $("loginButton").disabled = true;
+      $("loginButton").textContent = "Signing in…";
+      $("loginMessage").textContent = "";
+
+      try {
+        await signInWithEmailAndPassword(
+          auth, $("email").value.trim(), $("password").value
+        );
+        // onAuthStateChanged verifies the admin record.
+      } catch (error) {
+        $("loginMessage").textContent = "Login failed: " + error.message;
+      } finally {
+        $("loginButton").disabled = false;
+        $("loginButton").textContent = "Login to Dashboard";
+      }
+    });
+
+    onAuthStateChanged(auth, user => {
+      if (user) startAdminSession(user);
+      else {
+        stopListeners();
+        isAdmin = false;
+        showLogin();
+      }
+    });
+
+    $("logoutButton").addEventListener("click", async () => {
+      stopListeners();
+      await signOut(auth);
+    });
+
+    function teamIsComplete(team) {
+      return team.status === "completed" ||
+        team.status === "complete" ||
+        team.completed === true ||
+        typeof team.completionTimeSeconds === "number";
+    }
+
+    function completionSeconds(team) {
+      if (typeof team.completionTimeSeconds === "number") {
+        return team.completionTimeSeconds;
+      }
+      return null;
+    }
+
+    function fmt(seconds) {
+      if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "—";
+      seconds = Math.floor(seconds);
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      return h > 0
+        ? `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
+        : `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    }
+
+    function dateText(value) {
+      if (!value) return "—";
+      const date = typeof value.toDate === "function" ? value.toDate() : new Date(value);
+      return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString();
+    }
+
+    function eventStatus() {
+      return eventData.status || "waiting";
+    }
+
+    function startMillis() {
+      const value = eventData.startedAt;
+      if (!value) return null;
+      if (typeof value.toMillis === "function") return value.toMillis();
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date.getTime();
+    }
+
+    function renderTimer() {
+      const status = eventStatus();
+      const start = startMillis();
+      const duration = Number(eventData.durationSeconds || 1800);
+      let elapsed = 0;
+
+      if (start && status === "started") {
+        elapsed = Math.max(0, Math.floor((Date.now() - start) / 1000));
+      }
+
+      const remaining = Math.max(0, duration - elapsed);
+      const display = status === "started" ? fmt(remaining) : "00:00";
+
+      $("mainTimer").textContent = display;
+      $("gameTimer").textContent = display;
+      $("dashboardTimer").textContent = display;
+
+      let caption = "Waiting for the event to start.";
+      if (status === "started") {
+        caption = remaining === 0
+          ? "Time limit reached. Close the game when ready."
+          : `Elapsed: ${fmt(elapsed)} · Remaining: ${fmt(remaining)}`;
+      } else if (status === "closed") {
+        caption = "Game is closed.";
+      } else {
+        caption = "Game is in waiting mode.";
+      }
+
+      $("timerCaption").textContent = caption;
+      $("gameTimerCaption").textContent = caption;
+      $("eventBadge").textContent = "● " + status.toUpperCase();
+      $("eventBadge").style.background =
+        status === "started" ? "#e4f8ec" :
+        status === "closed" ? "#ffe5e8" : "#eeebff";
+    }
+
+    function listenForData() {
+      if (!isAdmin) return;
+
+      unsubTeams = onSnapshot(collection(db, "teams"), snap => {
+        teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAll();
+      }, err => notice("Could not read teams: " + err.message, true));
+
+      unsubEvent = onSnapshot(doc(db, "event", "current"), snap => {
+        eventData = snap.exists() ? snap.data() : { status: "waiting" };
+        renderTimer();
+      }, err => notice("Could not read event status: " + err.message, true));
+
+      timerInterval = setInterval(renderTimer, 1000);
+    }
+
+    function renderAll() {
+      const completed = teams.filter(teamIsComplete).length;
+      $("totalTeams").textContent = teams.length;
+      $("completedTeams").textContent = completed;
+      $("pendingTeams").textContent = teams.length - completed;
+
+      renderRecent();
+      renderTeams();
+      renderLeaderboard();
+    }
+
+    function makeCell(text) {
+      const td = document.createElement("td");
+      td.textContent = text;
+      return td;
+    }
+
+    function makeStatus(team) {
+      const span = document.createElement("span");
+      span.className = "status " + (teamIsComplete(team) ? "done" : "pending");
+      span.textContent = teamIsComplete(team) ? "Completed" : (team.status || "Pending");
+      return span;
+    }
+
+    function renderRecent() {
+      const body = $("recentTeams");
+      body.replaceChildren();
+      const recent = [...teams].sort((a,b) => {
+        const av = a.createdAt?.toMillis?.() || 0;
+        const bv = b.createdAt?.toMillis?.() || 0;
+        return bv - av;
+      }).slice(0, 5);
+
+      if (!recent.length) {
+        body.innerHTML = '<tr><td colspan="3" class="empty">No teams registered yet.</td></tr>';
+        return;
+      }
+
+      recent.forEach(team => {
+        const tr = document.createElement("tr");
+        tr.append(makeCell(team.teamName || "Unnamed team"));
+        const statusCell = document.createElement("td");
+        statusCell.append(makeStatus(team));
+        tr.append(statusCell);
+        tr.append(makeCell(fmt(completionSeconds(team))));
+        body.append(tr);
+      });
+    }
+
+    function renderTeams() {
+      const body = $("teamsTable");
+      body.replaceChildren();
+
+      const query = $("teamSearch").value.trim().toLowerCase();
+      const filtered = teams.filter(t => (t.teamName || "").toLowerCase().includes(query));
+
+      $("teamCount").textContent = `Showing ${filtered.length} of ${teams.length} teams`;
+
+      if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="6" class="empty">No matching teams found.</td></tr>';
+        return;
+      }
+
+      filtered.forEach((team, index) => {
+        const tr = document.createElement("tr");
+        tr.append(makeCell(String(index + 1)));
+        tr.append(makeCell(team.teamName || "Unnamed team"));
+        tr.append(makeCell(dateText(team.createdAt)));
+
+        const statusCell = document.createElement("td");
+        statusCell.append(makeStatus(team));
+        tr.append(statusCell);
+
+        tr.append(makeCell(fmt(completionSeconds(team))));
+
+        const actionCell = document.createElement("td");
+        const button = document.createElement("button");
+        button.className = "btn danger small-btn";
+        button.textContent = "Delete";
+        button.addEventListener("click", () => deleteTeam(team));
+        actionCell.append(button);
+        tr.append(actionCell);
+        body.append(tr);
+      });
+    }
+
+    function renderLeaderboard() {
+      const body = $("leaderboardTable");
+      body.replaceChildren();
+
+      const completed = teams
+        .filter(t => teamIsComplete(t) && completionSeconds(t) != null)
+        .sort((a,b) => completionSeconds(a) - completionSeconds(b));
+
+      if (!completed.length) {
+        body.innerHTML = '<tr><td colspan="4" class="empty">No completion times recorded yet.</td></tr>';
+        return;
+      }
+
+      completed.forEach((team, index) => {
+        const tr = document.createElement("tr");
+        tr.append(makeCell("#" + (index + 1)));
+        tr.append(makeCell(team.teamName || "Unnamed team"));
+        tr.append(makeCell(fmt(completionSeconds(team))));
+        tr.append(makeCell(dateText(team.completedAt)));
+        body.append(tr);
+      });
+    }
+
+    async function deleteTeam(team) {
+      if (!isAdmin) return;
+      const name = team.teamName || "this team";
+
+      if (!confirm(`Delete "${name}" permanently? This cannot be undone.`)) return;
+
+      try {
+        // Team names were registered under teamNames/{encodeURIComponent(lowercaseName)}.
+        await deleteDoc(doc(db, "teams", team.id));
+
+        if (team.teamName) {
+          const nameId = encodeURIComponent(team.teamName.toLowerCase());
+          try {
+            await deleteDoc(doc(db, "teamNames", nameId));
+          } catch (error) {
+            console.warn("Team deleted, but teamNames cleanup failed:", error);
+          }
+        }
+
+        notice(`Deleted team: ${name}`);
+      } catch (error) {
+        notice("Could not delete team: " + error.message, true);
+      }
+    }
+
+    async function setGameStatus(status) {
+      if (!isAdmin) return;
+
+      try {
+        const ref = doc(db, "event", "current");
+        const snap = await getDoc(ref);
+        const current = snap.exists() ? snap.data() : {};
+
+        if (status === "started") {
+          const minutes = Number($("durationMinutes").value || 30);
+          if (!Number.isFinite(minutes) || minutes < 1 || minutes > 600) {
+            notice("Game duration must be between 1 and 600 minutes.", true);
+            return;
+          }
+
+          if (!confirm("Start or restart the game timer for all participants?")) return;
+
+          await setDoc(ref, {
+            ...current,
+            status: "started",
+            startedAt: serverTimestamp(),
+            durationSeconds: Math.floor(minutes * 60),
+            updatedAt: serverTimestamp()
+          });
+        } else {
+          const message = status === "closed"
+            ? "Close the game for all participants?"
+            : "Return all participants to waiting mode?";
+          if (!confirm(message)) return;
+
+          await setDoc(ref, {
+            ...current,
+            status,
+            updatedAt: serverTimestamp()
+          });
+        }
+
+        notice("Event status updated to: " + status);
+      } catch (error) {
+        notice("Could not update game status: " + error.message, true);
+      }
+    }
+
+    ["startButton", "startButton2"].forEach(id =>
+      $(id).addEventListener("click", () => setGameStatus("started"))
+    );
+    ["waitingButton", "waitingButton2"].forEach(id =>
+      $(id).addEventListener("click", () => setGameStatus("waiting"))
+    );
+    ["closeButton", "closeButton2"].forEach(id =>
+      $(id).addEventListener("click", () => setGameStatus("closed"))
+    );
+
+    $("teamSearch").addEventListener("input", renderTeams);
+
+    document.querySelectorAll(".nav[data-section]").forEach(button => {
+      button.addEventListener("click", () => showSection(button.dataset.section));
+    });
+
+    document.querySelectorAll("[data-go]").forEach(button => {
+      button.addEventListener("click", () => showSection(button.dataset.go));
+    });
+
+    function showSection(name) {
+      const sections = ["dashboard", "teams", "game", "results"];
+      sections.forEach(s => $(s + "Section").classList.toggle("hidden", s !== name));
+      document.querySelectorAll(".nav[data-section]").forEach(button =>
+        button.classList.toggle("active", button.dataset.section === name)
+      );
+
+      $("pageTitle").textContent = ({
+        dashboard: "Dashboard Overview",
+        teams: "Team Management",
+        game: "Game Control",
+        results: "Results & Leaderboard"
+      })[name];
+    }
+
+    $("refreshButton").addEventListener("click", async () => {
+      if (!isAdmin) return;
+      try {
+        const [teamSnap, eventSnap] = await Promise.all([
+          getDocs(collection(db, "teams")),
+          getDoc(doc(db, "event", "current"))
+        ]);
+        teams = teamSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        eventData = eventSnap.exists() ? eventSnap.data() : { status: "waiting" };
+        renderAll();
+        renderTimer();
+        notice("Dashboard refreshed.");
+      } catch (error) {
+        notice("Refresh failed: " + error.message, true);
+      }
+    });
+
+    $("exportButton").addEventListener("click", () => {
+      if (!isAdmin) return;
+
+      const rows = [["Rank", "Team Name", "Completion Time Seconds", "Completed At"]];
+      const completed = teams
+        .filter(t => teamIsComplete(t) && completionSeconds(t) != null)
+        .sort((a,b) => completionSeconds(a) - completionSeconds(b));
+
+      completed.forEach((team, i) => rows.push([
+        i + 1,
+        team.teamName || "",
+        completionSeconds(team),
+        dateText(team.completedAt)
+      ]));
+
+      const csv = rows.map(row => row.map(value =>
+        '"' + String(value).replaceAll('"', '""') + '"'
+      ).join(",")).join("\r\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "diet-crossword-results.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

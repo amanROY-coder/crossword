@@ -1,0 +1,569 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIET × Crossword | Engineering Challenge</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --lav: #9180f3;
+      --blue: #76c9f2;
+      --ink: #414d70;
+      --muted: #8490ae;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Nunito, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(135deg, #e9e7ff, #dff4ff, #f5eaff);
+    }
+
+    header {
+      min-height: 76px;
+      padding: 14px 5%;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #ffffffb8;
+      border-bottom: 1px solid white;
+      box-shadow: 0 5px 20px #6679a01a;
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .diet { color: #7564d9; }
+    .cross { color: #465779; }
+    .x { color: #65bde8; }
+
+    .nav {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #8290b1;
+    }
+
+    .status {
+      margin-left: auto;
+      padding: 9px 14px;
+      border-radius: 30px;
+      background: #e4fff1;
+      color: #288d64;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    main {
+      width: min(1100px, 92%);
+      min-height: calc(100vh - 135px);
+      margin: auto;
+      padding: 55px 0;
+      display: grid;
+      grid-template-columns: 1fr 0.85fr;
+      gap: 45px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      color: #786ad8;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 5vw, 68px);
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: -2px;
+    }
+
+    h1 span {
+      display: block;
+      margin-top: 8px;
+      background: linear-gradient(100deg, #8072e9, #66bce9);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-copy {
+      max-width: 470px;
+      margin: 23px 0;
+      color: #6e7b9c;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .feature-icon {
+      display: grid;
+      place-items: center;
+      width: 43px;
+      height: 43px;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #fff, #dce9ff);
+      box-shadow: 5px 6px 0 #a8b5e3;
+      font-size: 21px;
+    }
+
+    .card {
+      padding: 28px;
+      border-radius: 27px;
+      background: linear-gradient(145deg, #ffffffed, #edf2ffed);
+      border: 1px solid white;
+      box-shadow: 10px 12px 0 #aab7df55,
+                  0 18px 40px #7189bd20;
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .card-copy {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #dce4fa;
+      border-radius: 15px;
+      background: #f4f7ff;
+      color: #465477;
+      font: inherit;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #9b8afb;
+      box-shadow: 0 0 0 4px #9b8afb20;
+    }
+
+    .btn {
+      width: 100%;
+      margin-top: 18px;
+      padding: 15px 18px;
+      border: 0;
+      border-radius: 16px;
+      color: white;
+      font: inherit;
+      font-weight: 900;
+      background: linear-gradient(105deg, #9180f3, #76c9f2);
+      box-shadow: 0 6px 0 #7779c8;
+      cursor: pointer;
+    }
+
+    .btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .message.error {
+      display: block;
+      background: #fff0f2;
+      color: #b7445b;
+    }
+
+    .message.success {
+      display: block;
+      background: #e8fff3;
+      color: #27845e;
+    }
+
+    .note {
+      margin: 16px 0 0;
+      text-align: center;
+      color: #929db8;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    footer {
+      padding: 16px;
+      text-align: center;
+      color: #8490ae;
+      font-size: 12px;
+      background: #ffffff70;
+      border-top: 1px solid white;
+    }
+
+    @media (max-width: 800px) {
+      main {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        padding: 35px 0;
+      }
+
+      .hero { text-align: center; }
+      .hero-copy { margin-left: auto; margin-right: auto; }
+      .features { justify-content: center; }
+    }
+
+    @media (max-width: 500px) {
+      header { padding: 12px 4%; gap: 8px; }
+      .brand { font-size: 17px; }
+      .nav { display: none; }
+      .status { padding: 8px; font-size: 10px; }
+      .card { padding: 23px 18px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">
+      🧩 <span class="diet">DIET</span>
+      <span class="cross"><span class="x">×</span> Crossword</span>
+    </div>
+
+    <div class="nav">ENGINEERING CHALLENGE</div>
+    <div class="status" id="headerStatus">Connecting...</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">THINK · SOLVE · WIN</div>
+
+      <h1>
+        Challenge Your
+        <span>Engineering Mind</span>
+      </h1>
+
+      <p class="hero-copy">
+        Put your technical knowledge to the test.
+        Register your team, get ready to solve the crossword,
+        and take on the engineering challenge.
+      </p>
+
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">🧠</div>
+          <div>Think<br>Smart</div>
+        </div>
+
+        <div class="feature">
+          <div class="feature-icon">🧩</div>
+          <div>Solve<br>Together</div>
+        </div>
+
+        <div class="feature">
+          <div class="feature-icon">🏆</div>
+          <div>Compete<br>&amp; Win</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>🚀 Team Registration</h2>
+
+      <p class="card-copy">
+        Enter your team name below to register for the
+        engineering crossword challenge.
+      </p>
+
+      <form id="registrationForm">
+        <label for="teamName">Your Team Name</label>
+
+        <input
+          id="teamName"
+          type="text"
+          placeholder="Enter your team name"
+          minlength="2"
+          maxlength="50"
+          autocomplete="off"
+          required
+        >
+
+        <button class="btn" id="registerBtn" type="submit" disabled>
+          Connecting to Firebase...
+        </button>
+
+        <div class="message" id="formMessage" role="status"></div>
+      </form>
+
+      <p class="note">
+        <strong>One team name per registration.</strong><br>
+        Make sure your team name is correct before submitting.
+      </p>
+    </section>
+  </main>
+
+  <footer>DIET × Crossword · Engineering Challenge</footer>
+
+  <script type="module">
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      runTransaction,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCKdwMtdNS1NeQdigvkni7XJUUNaP2VWoQ",
+      authDomain: "test-protal.firebaseapp.com",
+      projectId: "test-protal",
+      storageBucket: "test-protal.firebasestorage.app",
+      messagingSenderId: "168100330624",
+      appId: "1:168100330624:web:d9b3b1c050ce4ede7cfa65",
+      measurementId: "G-DNMJ64CY61"
+    };
+
+    const $ = id => document.getElementById(id);
+
+    const form = $("registrationForm");
+    const teamInput = $("teamName");
+    const registerBtn = $("registerBtn");
+    const formMessage = $("formMessage");
+
+    let auth;
+    let db;
+    let currentUser = null;
+    let registered = false;
+    let submitting = false;
+
+    function showMessage(message, type = "error") {
+      formMessage.textContent = message;
+      formMessage.className = "message " + type;
+    }
+
+    function setHeader(message) {
+      $("headerStatus").textContent = message;
+    }
+
+    function normaliseName(name) {
+      return name.trim().replace(/\s+/g, " ");
+    }
+
+    // Redirect only after confirming registration exists.
+    async function checkExistingRegistration(user) {
+      const teamRef = doc(db, "teams", user.uid);
+      const snapshot = await getDoc(teamRef);
+
+      if (snapshot.exists()) {
+        registered = true;
+        setHeader("Team Registered ✓");
+        registerBtn.disabled = true;
+        registerBtn.textContent = "Opening Waiting Lobby...";
+
+        // Important: open the separate waiting.html page.
+        window.location.replace("waiting.html");
+        return true;
+      }
+
+      registered = false;
+      registerBtn.disabled = false;
+      registerBtn.textContent = "Register Team →";
+      setHeader("Registration Open");
+      return false;
+    }
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+
+      onAuthStateChanged(auth, async user => {
+        if (!user) {
+          try {
+            await signInAnonymously(auth);
+          } catch (error) {
+            console.error("Authentication error:", error);
+            setHeader("Firebase Error");
+            showMessage(
+              "Firebase sign-in failed. Enable Anonymous sign-in in Firebase Authentication."
+            );
+          }
+          return;
+        }
+
+        currentUser = user;
+
+        try {
+          await checkExistingRegistration(user);
+        } catch (error) {
+          console.error("Registration check error:", error);
+          setHeader("Connection Error");
+          registerBtn.disabled = true;
+          showMessage(
+            "Could not check registration. Check your Firestore security rules and internet connection."
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+      setHeader("Firebase Error");
+      showMessage("Firebase configuration could not be initialized.");
+    }
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+
+      if (submitting || registered) return;
+
+      if (!db || !currentUser) {
+        showMessage("Firebase is connecting. Please try again.");
+        return;
+      }
+
+      const teamName = normaliseName(teamInput.value);
+
+      if (teamName.length < 2) {
+        showMessage("Team name must contain at least 2 characters.");
+        return;
+      }
+
+      submitting = true;
+      registerBtn.disabled = true;
+      registerBtn.textContent = "Registering...";
+      formMessage.className = "message";
+
+      const uid = currentUser.uid;
+      const teamRef = doc(db, "teams", uid);
+      const nameRef = doc(
+        db,
+        "teamNames",
+        encodeURIComponent(teamName.toLowerCase())
+      );
+
+      try {
+        await runTransaction(db, async transaction => {
+          const existingTeam = await transaction.get(teamRef);
+
+          if (existingTeam.exists()) {
+            throw new Error("TEAM_ALREADY_REGISTERED");
+          }
+
+          const existingName = await transaction.get(nameRef);
+
+          if (existingName.exists()) {
+            throw new Error("TEAM_NAME_TAKEN");
+          }
+
+          transaction.set(teamRef, {
+            teamName: teamName,
+            status: "registered",
+            createdAt: serverTimestamp()
+          });
+
+          transaction.set(nameRef, {
+            teamId: uid,
+            teamName: teamName,
+            createdAt: serverTimestamp()
+          });
+        });
+
+        // Registration succeeded; now go to waiting.html.
+        registered = true;
+        setHeader("Registration Successful");
+        registerBtn.textContent = "Opening Waiting Lobby...";
+
+        showMessage(
+          "Team registered successfully! Opening Waiting Lobby...",
+          "success"
+        );
+
+        window.location.replace("waiting.html");
+
+      } catch (error) {
+        console.error("Registration error:", error);
+
+        if (error.message === "TEAM_NAME_TAKEN") {
+          showMessage(
+            "This team name is already taken. Please choose another."
+          );
+        } else if (error.message === "TEAM_ALREADY_REGISTERED") {
+          // Recover if the team document already exists.
+          try {
+            const snapshot = await getDoc(teamRef);
+
+            if (snapshot.exists()) {
+              window.location.replace("waiting.html");
+              return;
+            }
+          } catch (checkError) {
+            console.error(checkError);
+          }
+
+          showMessage("A team is already registered.");
+        } else if (
+          error.code === "permission-denied" ||
+          error.code === "firestore/permission-denied"
+        ) {
+          showMessage(
+            "Firestore permission denied. Please check your security rules."
+          );
+        } else {
+          showMessage(
+            "Registration failed. Check your internet connection and try again."
+          );
+        }
+
+        registerBtn.disabled = false;
+        registerBtn.textContent = "Register Team →";
+      } finally {
+        submitting = false;
+      }
+    });
+  </script>
+</body>
+</html>

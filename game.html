@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crossword Arena</title>
+<style>
+:root{--blue:#4169e1;--ink:#202c42;--muted:#7b879b;--line:#e7ebf3;--green:#1eaa79;--red:#e45464}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Arial,sans-serif;background:#f5f7fc;color:var(--ink)}
+button,input{font:inherit}button{cursor:pointer}
+.app{display:grid;grid-template-columns:205px minmax(0,1fr);min-height:100vh}
+.sidebar{background:white;border-right:1px solid var(--line);padding:24px 16px;display:flex;flex-direction:column;gap:28px}
+.brand{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800}
+.brand-icon{background:var(--blue);color:white;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:22px}
+.nav-label{color:#a1a9b8;font-size:10px;letter-spacing:1.4px;font-weight:800;margin:0 0 12px 9px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:5px;border:0;border-radius:10px;color:#778297;background:transparent;width:100%;text-align:left;font-size:13px}
+.nav-item:hover,.nav-item.active{color:var(--blue);background:#edf2ff}
+.sidebar-bottom{margin-top:auto;border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafbff;font-size:12px}
+.sidebar-bottom p{color:var(--muted);font-size:11px;line-height:1.6;margin-top:6px}
+.main{padding:27px 30px;max-width:1600px;width:100%;margin:auto;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:25px}
+.eyebrow{color:var(--blue);text-transform:uppercase;letter-spacing:1.8px;font-size:10px;font-weight:800;margin-bottom:6px}
+h1{font-size:clamp(23px,2.3vw,30px);letter-spacing:-1px}
+.subtitle{font-size:12px;color:var(--muted);margin-top:7px}
+.top-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:white;color:var(--ink);padding:10px 14px;border-radius:9px;font-weight:700;font-size:12px}
+.btn:hover{background:#f2f5ff}
+.btn-primary{background:var(--blue);color:white;border-color:var(--blue)}
+.btn-primary:hover{background:#3458cc}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:22px}
+.stat{background:white;border:1px solid var(--line);border-radius:13px;padding:17px;display:flex;gap:12px;align-items:center;min-width:0}
+.stat-icon{width:40px;height:40px;border-radius:11px;background:#edf2ff;display:grid;place-items:center;font-size:19px;flex-shrink:0}
+.stat small{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
+.stat strong{font-size:21px}
+.game-layout{display:grid;grid-template-columns:minmax(300px,1.2fr) minmax(280px,.8fr);gap:20px;align-items:start}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:22px;min-width:0}
+.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.panel-heading h2{font-size:16px}
+.pill{background:#edf2ff;color:var(--blue);font-size:10px;font-weight:800;padding:7px 10px;border-radius:20px}
+.panel-description{color:var(--muted);font-size:11px;line-height:1.7;margin-bottom:19px}
+.grid-wrap{display:flex;justify-content:center;overflow:auto;padding:4px 0 12px}
+.crossword{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:min(100%,440px);aspect-ratio:1;gap:3px;flex-shrink:0}
+.cell{position:relative;border:1px solid #dbe2f0;background:#f8faff;border-radius:5px;display:grid;place-items:center;min-width:0}
+.cell.block{background:#26344f;border-color:#26344f}
+.cell input{width:100%;height:100%;border:0;outline:0;background:transparent;text-align:center;text-transform:uppercase;color:#243451;font-size:clamp(12px,2vw,23px);font-weight:800;padding:0;border-radius:5px}
+.cell input:focus,.cell.selected{background:#e5edff;border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.cell input.correct{color:var(--green);background:#e9fbf4}
+.cell input.wrong{color:var(--red);background:#fff0f1}
+.cell-number{position:absolute;top:2px;left:3px;font-size:8px;color:#66758f;pointer-events:none;z-index:1}
+.grid-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:15px;margin-top:5px}
+.legend{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:10px}
+.legend-dot{width:9px;height:9px;border-radius:3px;background:#26344f}
+.legend-dot.empty{background:#f8faff;border:1px solid #dbe2f0}
+.clue-tabs{display:flex;gap:8px;padding:4px;background:#f5f7fc;border-radius:10px;margin:17px 0}
+.tab{flex:1;border:0;background:transparent;padding:10px;border-radius:7px;color:var(--muted);font-size:12px;font-weight:800}
+.tab.active{background:white;color:var(--blue);box-shadow:0 2px 8px #2434510b}
+.clues{display:flex;flex-direction:column;gap:10px}
+.clue{border:1px solid var(--line);border-radius:11px;padding:12px}
+.clue.active{border-color:#9eb3ff;background:#f7f9ff}
+.clue.solved{border-color:#b5ead6;background:#f4fcf8}
+.clue-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+.clue-title{font-size:11px;font-weight:800;color:var(--blue)}
+.clue-length{font-size:10px;color:var(--muted)}
+.clue-text{font-size:12px;font-weight:600;line-height:1.5;margin-bottom:10px}
+.answer-row{display:flex;gap:8px}
+.answer-row input{width:100%;min-width:0;border:1px solid #e1e6f0;background:white;border-radius:8px;padding:10px;outline:0;text-transform:uppercase;font-size:12px;font-weight:800;letter-spacing:2px}
+.answer-row input:focus{border-color:var(--blue)}
+.answer-row input:disabled{background:#f2fbf7;color:var(--green)}
+.answer-row button{border:0;background:#edf2ff;color:var(--blue);padding:0 12px;border-radius:8px;font-size:11px;font-weight:800}
+.game-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}
+.game-actions button{padding:12px 9px}
+.game-actions .wide{grid-column:1/-1}
+.status{margin-top:14px;padding:11px 12px;border-radius:9px;background:#f5f7fc;color:#6b778c;font-size:11px;line-height:1.6;min-height:38px;overflow-wrap:anywhere}
+.status.success{background:#eafaf3;color:#16855e}
+.status.error{background:#fff0f1;color:#bd3e4c}
+.progress-area{margin-top:20px}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;color:var(--muted)}
+.progress-track{height:7px;border-radius:20px;background:#edf0f7;overflow:hidden}
+.progress-bar{width:0;height:100%;background:var(--green);transition:width .2s}
+.footer{text-align:center;color:#a0a9b8;font-size:10px;margin-top:25px;padding-bottom:5px}
+@media(max-width:1050px){.app{grid-template-columns:75px minmax(0,1fr)}.sidebar{padding:20px 10px;align-items:center}.brand{font-size:0}.nav-label,.nav-text,.sidebar-bottom{display:none}.nav-item{justify-content:center;padding:13px 8px;font-size:18px}.game-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){.main{padding:19px 12px}.topbar{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.stat{padding:12px;gap:9px}.stat-icon{width:34px;height:34px}.stat strong{font-size:18px}.panel{padding:15px}.top-actions{width:100%}.top-actions .btn{flex:1}.crossword{gap:2px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">✣</div>Crossword</div>
+  <div>
+    <div class="nav-label">MENU</div>
+    <button class="nav-item active"><span>⌂</span><span class="nav-text">Dashboard</span></button>
+    <button class="nav-item" id="newGameSide"><span>▦</span><span class="nav-text">New Game</span></button>
+    <button class="nav-item" id="hintSide"><span>✦</span><span class="nav-text">Get a Hint</span></button>
+    <button class="nav-item" id="resetSide"><span>↻</span><span class="nav-text">Reset Puzzle</span></button>
+  </div>
+  <div class="sidebar-bottom">
+    <strong>Crossword Arena</strong>
+    <p>Think carefully, solve the clues, and complete the challenge before time runs out.</p>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">WORD CHALLENGE</div>
+      <h1>Crossword Arena</h1>
+      <p class="subtitle" id="welcome">Solve the clues. Complete the challenge.</p>
+      <p class="subtitle" id="teamBadge">Connecting team...</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="pauseBtn">Ⅱ Pause</button>
+      <button class="btn btn-primary" id="newGameBtn">↻ New Game</button>
+    </div>
+  </header>
+
+  <section class="stats">
+    <div class="stat"><div class="stat-icon">⏱</div><div><small>Elapsed Time</small><strong id="timer">00:00</strong></div></div>
+    <div class="stat"><div class="stat-icon">🏆</div><div><small>Score</small><strong id="score">0</strong></div></div>
+    <div class="stat"><div class="stat-icon">✓</div><div><small>Completed</small><strong id="completed">0 / 6</strong></div></div>
+    <div class="stat"><div class="stat-icon">✦</div><div><small>Hints Used</small><strong id="hints">0</strong></div></div>
+  </section>
+
+  <section class="game-layout">
+    <div class="panel">
+      <div class="panel-heading"><h2>Crossword Grid</h2><span class="pill">8 × 8 GRID</span></div>
+      <p class="panel-description">Fill the empty boxes using the clues. Select a cell to switch between crossing words.</p>
+      <div class="grid-wrap"><div class="crossword" id="crossword"></div></div>
+      <div class="grid-footer">
+        <div class="legend"><span class="legend-dot"></span> Blocked cell</div>
+        <div class="legend"><span class="legend-dot empty"></span> Letter cell</div>
+      </div>
+      <div class="progress-area">
+        <div class="progress-label"><span>Puzzle Progress</span><strong id="progressText">0%</strong></div>
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-heading"><h2>Clues & Answers</h2><span class="pill">BEGINNER</span></div>
+      <p class="panel-description">Read each clue and enter your answer. Crossing letters will help you solve the puzzle.</p>
+      <div class="clue-tabs">
+        <button class="tab active" data-direction="across">→ Across</button>
+        <button class="tab" data-direction="down">↓ Down</button>
+      </div>
+      <div class="clues" id="clues"></div>
+      <div class="game-actions">
+        <button class="btn btn-primary" id="submitBtn">Submit Answers</button>
+        <button class="btn" id="hintBtn">✦ Get a Hint</button>
+        <button class="btn wide" id="resetBtn">↻ Reset Puzzle</button>
+      </div>
+      <div class="status" id="status" aria-live="polite">Waiting for admin to start the game...</div>
+    </div>
+  </section>
+  <footer class="footer">© 2026 Crossword Arena · Designed by Satyam</footer>
+</main>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInAnonymously} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getFirestore,doc,getDoc,onSnapshot,updateDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyCKdwMtdNS1NeQdigvkni7XJUUNaP2VWoQ",
+  authDomain:"test-protal.firebaseapp.com",
+  projectId:"test-protal",
+  storageBucket:"test-protal.firebasestorage.app",
+  messagingSenderId:"168100330624",
+  appId:"1:168100330624:web:d9b3b1c050ce4ede7cfa65",
+  measurementId:"G-DNMJ64CY61"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+let currentUser=null,teamData=null,teamRef=null,eventUnsubscribe=null;
+let eventIsStarted=false,eventStartedAtMs=null,eventDurationSeconds=1800;
+let resultSaved=false,resultSaving=false;
+let elapsed=0,timerInterval=null,paused=false,hintsUsed=0,score=0;
+let solved=new Set(),cells={},activeDirection="across",activeWordId=1;
+const SIZE=8;
+const grid=document.getElementById("crossword");
+const cluesBox=document.getElementById("clues");
+const statusBox=document.getElementById("status");
+
+/* 5 Different Sets of Questions */
+const allSets = [
+  [ // Set 1
+    {id:1, direction:"across", answer:"RAM", clue:"Short-term memory of a computer.", row:3, col:1},
+    {id:2, direction:"across", answer:"WEB", clue:"System of connected documents on the internet.", row:5, col:2},
+    {id:3, direction:"down", answer:"BUG", clue:"An error or flaw in a program.", row:1, col:2},
+    {id:4, direction:"down", answer:"USB", clue:"Common port used to connect flash drives.", row:2, col:3},
+    {id:5, direction:"down", answer:"LAN", clue:"A local network of computers.", row:4, col:1},
+    {id:6, direction:"across", answer:"APP", clue:"A software program used on a smartphone.", row:6, col:1}
+  ],
+  [ // Set 2
+    {id:1, direction:"across", answer:"MAC", clue:"Apple's computer operating system.", row:3, col:1},
+    {id:2, direction:"across", answer:"URL", clue:"The address of a website.", row:5, col:2},
+    {id:3, direction:"down", answer:"CPU", clue:"The brain of the computer.", row:1, col:2},
+    {id:4, direction:"down", answer:"DOS", clue:"Old command-line operating system.", row:2, col:3},
+    {id:5, direction:"down", answer:"PDF", clue:"Common document file format.", row:4, col:1},
+    {id:6, direction:"across", answer:"SSD", clue:"Modern, fast storage drive.", row:6, col:1}
+  ],
+  [ // Set 3
+    {id:1, direction:"across", answer:"ROM", clue:"Read-only computer memory.", row:3, col:1},
+    {id:2, direction:"across", answer:"CSS", clue:"Language used to style web pages.", row:5, col:2},
+    {id:3, direction:"down", answer:"API", clue:"Allows apps to talk to each other.", row:1, col:2},
+    {id:4, direction:"down", answer:"SQL", clue:"Language used for databases.", row:2, col:3},
+    {id:5, direction:"down", answer:"GUI", clue:"Visual interface with icons and mouse.", row:4, col:1},
+    {id:6, direction:"across", answer:"ZIP", clue:"A compressed file format.", row:6, col:1}
+  ],
+  [ // Set 4
+    {id:1, direction:"across", answer:"WWW", clue:"World Wide Web abbreviation.", row:3, col:1},
+    {id:2, direction:"across", answer:"TCP", clue:"Core protocol of the internet.", row:5, col:2},
+    {id:3, direction:"down", answer:"VPN", clue:"Creates a secure network connection.", row:1, col:2},
+    {id:4, direction:"down", answer:"BOT", clue:"An automated software program.", row:2, col:3},
+    {id:5, direction:"down", answer:"BIT", clue:"Smallest unit of computer data.", row:4, col:1},
+    {id:6, direction:"across", answer:"PNG", clue:"Image format with transparent background.", row:6, col:1}
+  ],
+  [ // Set 5
+    {id:1, direction:"across", answer:"GIG", clue:"Short for Gigabyte.", row:3, col:1},
+    {id:2, direction:"across", answer:"MEG", clue:"Short for Megabyte.", row:5, col:2},
+    {id:3, direction:"down", answer:"HUB", clue:"Device connecting multiple computers.", row:1, col:2},
+    {id:4, direction:"down", answer:"LOG", clue:"File that records system events.", row:2, col:3},
+    {id:5, direction:"down", answer:"BIN", clue:"Recycle folder for deleted files.", row:4, col:1},
+    {id:6, direction:"across", answer:"EXE", clue:"Executable file extension in Windows.", row:6, col:1}
+  ]
+];
+
+let words = []; // Active set will be loaded here
+
+// Team ki UID ke hisaab se 0 se 4 ke beech ek set select karna
+function assignSetToTeam(uid) {
+  // UID string se ek number generate karke modulo 5 karenge
+  const charSum = uid.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const setIndex = charSum % 5;
+  
+  // Array ko copy karein taaki original reset na ho
+  words = JSON.parse(JSON.stringify(allSets[setIndex]));
+
+  // Words aur clues ko random order mein shuffle karein
+  for (let i = words.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [words[i], words[j]] = [words[j], words[i]];
+  }
+  // Naye IDs assign karein
+  words.forEach((word, index) => { word.id = index + 1; });
+}
+
+function key(r,c){return `${r}-${c}`;}
+function getInput(k){return grid.querySelector(`input[data-key="${k}"]`);}
+function wordKeys(w){return w.answer.split("").map((_,i)=>key(w.row+(w.direction==="down"?i:0),w.col+(w.direction==="across"?i:0)));}
+function getWordEntry(w){return wordKeys(w).map(k=>getInput(k)?.value||"").join("").toUpperCase();}
+
+function showStatus(message,type=""){
+ statusBox.textContent=message;
+ statusBox.className="status"+(type?" "+type:"");
+}
+function updateStats(){
+ document.getElementById("score").textContent=score;
+ document.getElementById("completed").textContent=`${solved.size} / ${words.length}`;
+ document.getElementById("hints").textContent=hintsUsed;
+}
+function updateProgress(){
+ const percent=Math.round(solved.size/words.length*100);
+ document.getElementById("progressBar").style.width=percent+"%";
+ document.getElementById("progressText").textContent=percent+"%";
+}
+function updateTabs(){
+ document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.direction===activeDirection));
+}
+function selectCell(k){
+ grid.querySelectorAll(".cell").forEach(el=>el.classList.remove("selected"));
+ grid.querySelector(`.cell[data-key="${k}"]`)?.classList.add("selected");
+ const ids=cells[k]?.wordIds||[];
+ let w=words.find(x=>x.id===activeWordId&&ids.includes(x.id));
+ if(!w)w=words.find(x=>x.direction===activeDirection&&ids.includes(x.id));
+ if(!w&&ids.length)w=words.find(x=>x.id===ids[0]);
+ if(w){activeWordId=w.id;activeDirection=w.direction;updateTabs();renderClues();}
+}
+function selectWord(id,direction){
+ const w=words.find(x=>x.id===id&&x.direction===direction);
+ if(!w)return;
+ activeWordId=id;activeDirection=direction;updateTabs();renderClues();
+ getInput(wordKeys(w)[0])?.focus();
+}
+function renderClues(){
+ cluesBox.innerHTML="";
+ words.filter(w=>w.direction===activeDirection).forEach(w=>{
+  const card=document.createElement("div");
+  card.className="clue"+(solved.has(w.id)?" solved":"")+(w.id===activeWordId?" active":"");
+  card.dataset.wordId=w.id;
+  const top=document.createElement("div");top.className="clue-top";
+  const title=document.createElement("span");title.className="clue-title";title.textContent=`${w.id}. ${w.direction.toUpperCase()}`;
+  const length=document.createElement("span");length.className="clue-length";length.textContent=`${w.answer.length} letters`;
+  top.append(title,length);
+  const clue=document.createElement("p");clue.className="clue-text";clue.textContent=w.clue;
+  const row=document.createElement("div");row.className="answer-row";
+  const input=document.createElement("input");input.placeholder="TYPE ANSWER";input.maxLength=w.answer.length;
+  input.value=getWordEntry(w);input.disabled=solved.has(w.id);
+  input.setAttribute("aria-label",`Answer for clue ${w.id}`);
+  input.addEventListener("input",()=>{
+   if(!eventIsStarted||resultSaved)return;
+   input.value=input.value.replace(/[^a-z]/gi,"").toUpperCase().slice(0,w.answer.length);
+   wordKeys(w).forEach((k,i)=>{
+    const cell=getInput(k);
+    if(cell&&!solved.has(w.id)){cell.value=input.value[i]||"";cell.classList.remove("wrong","correct");}
+   });
+   updateCrossingClues();
+  });
+  input.addEventListener("keydown",e=>{if(e.key==="Enter")checkWord(w);});
+  const button=document.createElement("button");
+  button.textContent=solved.has(w.id)?"Solved ✓":"Check";button.disabled=solved.has(w.id);
+  button.addEventListener("click",()=>checkWord(w));
+  row.append(input,button);card.append(top,clue,row);cluesBox.appendChild(card);
+ });
+}
+function updateCrossingClues(){
+ cluesBox.querySelectorAll(".clue").forEach(card=>{
+  const w=words.find(x=>x.id===Number(card.dataset.wordId));
+  const input=card.querySelector("input");
+  if(w&&input&&document.activeElement!==input)input.value=getWordEntry(w);
+ });
+}
+function moveToNextCell(k){
+ const w=words.find(x=>x.id===activeWordId);if(!w)return;
+ const keys=wordKeys(w),i=keys.indexOf(k);
+ if(i>=0&&i<keys.length-1)getInput(keys[i+1])?.focus();
+}
+function buildPuzzle(){
+ cells={};
+ words.forEach(w=>{
+  for(let i=0;i<w.answer.length;i++){
+   const r=w.row+(w.direction==="down"?i:0);
+   const c=w.col+(w.direction==="across"?i:0);
+   const k=key(r,c);
+   if(!cells[k])cells[k]={row:r,col:c,numbers:[],wordIds:[]};
+   cells[k].wordIds.push(w.id);
+   if(i===0)cells[k].numbers.push(w.id);
+  }
+ });
+ grid.innerHTML="";
+ for(let r=0;r<SIZE;r++){
+  for(let c=0;c<SIZE;c++){
+   const k=key(r,c),data=cells[k],div=document.createElement("div");
+   if(!data){div.className="cell block";grid.appendChild(div);continue;}
+   div.className="cell";div.dataset.key=k;
+   if(data.numbers.length){
+    const n=document.createElement("span");n.className="cell-number";n.textContent=data.numbers[0];div.appendChild(n);
+   }
+   const input=document.createElement("input");
+   input.maxLength=1;input.autocomplete="off";input.spellcheck=false;input.dataset.key=k;
+   input.setAttribute("aria-label",`Row ${r+1}, column ${c+1}`);
+   input.addEventListener("input",()=>{
+    if(!eventIsStarted||resultSaved){input.value="";return;}
+    input.value=input.value.replace(/[^a-z]/gi,"").toUpperCase().slice(-1);
+    input.classList.remove("wrong","correct");
+    updateCrossingClues();
+    if(input.value)moveToNextCell(k);
+   });
+   input.addEventListener("keydown",e=>{
+    if(e.key==="ArrowRight")moveBy(k,0,1);
+    if(e.key==="ArrowLeft")moveBy(k,0,-1);
+    if(e.key==="ArrowDown")moveBy(k,1,0);
+    if(e.key==="ArrowUp")moveBy(k,-1,0);
+    if(e.key==="Backspace"&&!input.value){
+     const w=words.find(x=>x.id===activeWordId);
+     if(w){const keys=wordKeys(w),i=keys.indexOf(k);if(i>0)getInput(keys[i-1])?.focus();}
+    }
+   });
+   input.addEventListener("focus",()=>selectCell(k));
+   div.appendChild(input);grid.appendChild(div);
+  }
+ }
+ renderClues();updateTabs();updateStats();updateProgress();
+}
+function moveBy(k,dr,dc){
+ const [r,c]=k.split("-").map(Number),next=key(r+dr,c+dc);
+ if(cells[next])getInput(next)?.focus();
+}
+function stopTimer(){if(timerInterval)clearInterval(timerInterval);timerInterval=null;}
+function startTimer(){
+ stopTimer();
+ timerInterval=setInterval(()=>{
+  if(!eventIsStarted||!eventStartedAtMs||paused||resultSaved)return;
+  elapsed=Math.max(0,Math.floor((Date.now()-eventStartedAtMs)/1000));
+  document.getElementById("timer").textContent=formatTime(elapsed);
+  if(elapsed>=eventDurationSeconds){
+   eventIsStarted=false;stopTimer();
+   showStatus("Event ka time khatam ho gaya. Admin se contact karo.","error");
+   grid.querySelectorAll("input").forEach(i=>i.disabled=true);
+  }
+ },1000);
+}
+function formatTime(seconds){
+ return String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");
+}
+async function checkWord(w){
+ if(!eventIsStarted){showStatus("Admin ke game start karne ka wait karo.","error");return;}
+ if(paused){showStatus("Game paused hai. Pehle Resume karo.","error");return;}
+ if(resultSaved)return;
+ const entry=getWordEntry(w);
+ if(entry.length!==w.answer.length){showStatus(`Clue ${w.id}: saare ${w.answer.length} letters bharo.`,"error");return;}
+ if(entry===w.answer){
+  if(!solved.has(w.id)){solved.add(w.id);score+=100;}
+  wordKeys(w).forEach(k=>getInput(k)?.classList.add("correct"));
+  showStatus(`Correct! "${w.answer}" bilkul sahi hai. +100 points!`,"success");
+  renderClues();updateStats();updateProgress();
+  if(solved.size===words.length)await saveCompletionResult();
+ }else{
+  score=Math.max(0,score-10);updateStats();
+  wordKeys(w).forEach(k=>getInput(k)?.classList.add("wrong"));
+  showStatus("Answer sahi nahi hai. Clue dobara padho aur crossing letters check karo.","error");
+ }
+}
+async function checkAll(){
+ if(!eventIsStarted){showStatus("Admin ke game start karne ka wait karo.","error");return;}
+ if(paused){showStatus("Game paused hai. Resume karne ke baad check karo.","error");return;}
+ if(resultSaved)return;
+ let correctNow=0;
+ words.forEach(w=>{
+  if(getWordEntry(w)===w.answer&&!solved.has(w.id)){
+   solved.add(w.id);score+=100;correctNow++;
+   wordKeys(w).forEach(k=>getInput(k)?.classList.add("correct"));
+  }
+ });
+ renderClues();updateStats();updateProgress();
+ if(solved.size===words.length)await saveCompletionResult();
+ else showStatus(correctNow?`${correctNow} new answer(s) correct!`:"Answers check ho gaye. Clue ke Check button se verify karo.",correctNow?"success":"");
+}
+function giveHint(){
+ if(!eventIsStarted){showStatus("Admin ke game start karne ka wait karo.","error");return;}
+ if(paused||resultSaved)return;
+ const w=words.find(x=>x.id===activeWordId&&!solved.has(x.id))||words.find(x=>!solved.has(x.id));
+ if(!w){showStatus("Saare words solve ho chuke hain!","success");return;}
+ const keys=wordKeys(w);
+ const i=keys.findIndex((k,index)=>(getInput(k)?.value||"")!==w.answer[index]);
+ const index=i>=0?i:0,input=getInput(keys[index]);
+ if(input){input.value=w.answer[index];input.classList.remove("wrong");input.focus();}
+ hintsUsed++;score=Math.max(0,score-15);updateStats();updateCrossingClues();
+ showStatus(`Hint: clue ${w.id} ka letter reveal kar diya. -15 points.`);
+}
+async function saveCompletionResult(){
+ if(resultSaved||resultSaving)return;
+ resultSaving=true;eventIsStarted=false;stopTimer();
+ try{
+  if(!currentUser||!teamRef||!teamData)throw new Error("Registered team ka Firebase session nahi mila.");
+  const seconds=eventStartedAtMs?Math.max(0,Math.floor((Date.now()-eventStartedAtMs)/1000)):elapsed;
+  await updateDoc(teamRef,{
+   status:"completed",
+   completed:true,
+   completionTimeSeconds:seconds,
+   completedAt:serverTimestamp(),
+   finalScore:score,
+   score:score,
+   hintsUsed:hintsUsed,
+   solvedCount:solved.size,
+   updatedAt:serverTimestamp()
+  });
+  resultSaved=true;
+  showStatus(`🎉 Puzzle complete! Result admin panel par save ho gaya. Time: ${formatTime(seconds)} | Score: ${score}`,"success");
+  grid.querySelectorAll("input").forEach(i=>i.disabled=true);
+ }catch(error){
+  console.error(error);
+  showStatus("Result save nahi hua: "+error.message+". Firebase Firestore rules check karo.","error");
+ }finally{resultSaving=false;}
+}
+function connectGameSession(user){
+ currentUser=user;teamRef=doc(db,"teams",user.uid);
+ getDoc(teamRef).then(snapshot=>{
+  if(!snapshot.exists()){
+   showStatus("Team registration nahi mili. Usi browser se game kholo jahan registration ki thi.","error");
+   document.getElementById("teamBadge").textContent="Team not registered";
+   return;
+  }
+  teamData=snapshot.data();
+  const teamName=teamData.teamName||teamData.name||"Registered Team";
+  document.getElementById("teamBadge").textContent="Team: "+teamName;
+  document.getElementById("welcome").textContent="Good luck, "+teamName+"!";
+  
+  // Yahan par team ki UID ke basis par 5 me se koi ek question set select hota hai
+  assignSetToTeam(user.uid);
+  buildPuzzle();
+
+  if(teamData.status==="completed"||teamData.completed===true){
+   resultSaved=true;eventIsStarted=false;
+   showStatus("Is team ka result pehle hi submit ho chuka hai.","success");
+   grid.querySelectorAll("input").forEach(i=>i.disabled=true);
+  }
+  if(eventUnsubscribe)eventUnsubscribe();
+  eventUnsubscribe=onSnapshot(doc(db,"event","current"),snapshot=>{
+   const event=snapshot.exists()?snapshot.data():{status:"waiting"};
+   const status=event.status||"waiting";
+   eventStartedAtMs=event.startedAt?.toMillis?event.startedAt.toMillis():(event.startedAt?new Date(event.startedAt).getTime():null);
+   eventDurationSeconds=Number(event.durationSeconds||1800);
+   if(status==="started"&&!resultSaved){
+    eventIsStarted=true;paused=false;
+    if(eventStartedAtMs)elapsed=Math.max(0,Math.floor((Date.now()-eventStartedAtMs)/1000));
+    grid.querySelectorAll("input").forEach(i=>i.disabled=false);
+    showStatus("🎮 Game live hai! Crossword solve karo.","success");
+    startTimer();
+   }else if(status==="closed"){
+    eventIsStarted=false;stopTimer();
+    grid.querySelectorAll("input").forEach(i=>i.disabled=true);
+    if(!resultSaved)showStatus("Admin ne game close kar diya.","error");
+   }else if(!resultSaved){
+    eventIsStarted=false;stopTimer();
+    grid.querySelectorAll("input").forEach(i=>i.disabled=true);
+    showStatus("⏳ Waiting for admin to start the game...");
+   }
+  },error=>showStatus("Firebase event error: "+error.message,"error"));
+ }).catch(error=>showStatus("Firebase/team load error: "+error.message,"error"));
+}
+function bootFirebaseGame(){
+ onAuthStateChanged(auth,user=>{
+  if(user){
+   if(currentUser?.uid===user.uid&&teamRef)return;
+   connectGameSession(user);
+  }else{
+   signInAnonymously(auth).catch(error=>{
+    showStatus("Firebase sign-in failed: "+error.message+". Firebase Console mein Anonymous sign-in enable karo.","error");
+   });
+  }
+ });
+}
+function resetGame(){
+ if(resultSaved){showStatus("Result submit ho chuka hai; is round ko reset nahi kar sakte.","error");return;}
+ stopTimer();elapsed=0;paused=false;hintsUsed=0;score=0;solved=new Set();
+ document.getElementById("timer").textContent="00:00";
+ document.getElementById("pauseBtn").textContent="Ⅱ Pause";
+ buildPuzzle();
+ grid.querySelectorAll("input").forEach(i=>i.disabled=!eventIsStarted);
+ updateStats();updateProgress();
+ if(eventIsStarted)startTimer();
+ showStatus(eventIsStarted?"Puzzle reset ho gaya. Solve all six clues!":"Puzzle reset. Admin ke game start karne ka wait karo.");
+}
+document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>selectWord(
+ (words.find(w=>w.direction===tab.dataset.direction&&!solved.has(w.id))||words.find(w=>w.direction===tab.dataset.direction)).id,
+ tab.dataset.direction
+)));
+document.getElementById("submitBtn").addEventListener("click",checkAll);
+document.getElementById("hintBtn").addEventListener("click",giveHint);
+document.getElementById("hintSide").addEventListener("click",giveHint);
+document.getElementById("resetBtn").addEventListener("click",resetGame);
+document.getElementById("resetSide").addEventListener("click",resetGame);
+document.getElementById("newGameBtn").addEventListener("click",resetGame);
+document.getElementById("newGameSide").addEventListener("click",resetGame);
+document.getElementById("pauseBtn").addEventListener("click",()=>{
+ if(!eventIsStarted||resultSaved)return;
+ paused=!paused;
+ document.getElementById("pauseBtn").textContent=paused?"▶ Resume":"Ⅱ Pause";
+ showStatus(paused?"Game paused hai. Resume button dabao.":"Game resumed. Good luck!");
+});
+
+showStatus("⏳ Waiting for admin to start the game...");
+bootFirebaseGame();
+</script>
+</body>
+</html>

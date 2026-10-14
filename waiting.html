@@ -1,0 +1,803 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waiting Lobby | DIET Engineering Crossword</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --lavender: #a99bff;
+      --blue: #a8d9ff;
+      --ink: #37345b;
+      --muted: #8584a7;
+      --white: rgba(255,255,255,.78);
+      --shadow: 0 18px 45px rgba(105,105,180,.15);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Nunito', sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 8% 10%, #e8e1ff 0%, transparent 38%),
+        radial-gradient(ellipse at 90% 15%, #d9f1ff 0%, transparent 36%),
+        linear-gradient(135deg, #f5f0ff, #eaf7ff 55%, #f6f2ff);
+      overflow-x: hidden;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(1px);
+      pointer-events: none;
+      z-index: -1;
+      animation: float 7s ease-in-out infinite;
+    }
+
+    .orb.one {
+      width: 190px;
+      height: 190px;
+      background: #d6caff80;
+      top: 12%;
+      left: -65px;
+    }
+
+    .orb.two {
+      width: 230px;
+      height: 230px;
+      background: #bce7ff70;
+      right: -90px;
+      bottom: 5%;
+      animation-delay: -3s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-18px); }
+    }
+
+    .page {
+      width: min(100% - 32px, 1080px);
+      margin: auto;
+      padding: 28px 0 35px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      font-size: 17px;
+      letter-spacing: -.3px;
+    }
+
+    .brand-icon {
+      display: grid;
+      place-items: center;
+      width: 47px;
+      height: 47px;
+      border-radius: 17px;
+      background: linear-gradient(145deg, #fff, #e1d9ff);
+      box-shadow: 7px 7px 16px #b8b0dd70, -6px -6px 15px #ffffffc9;
+      font-size: 24px;
+    }
+
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border: 1px solid #ffffffc9;
+      border-radius: 99px;
+      background: #ffffff80;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #8e82f8;
+      box-shadow: 0 0 0 4px #a99bff25;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .hero { padding: 20px 8px 20px 4px; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 13px;
+      border-radius: 99px;
+      background: #ffffffa6;
+      color: #7770c8;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      box-shadow: 4px 4px 12px #c5c0e633;
+    }
+
+    h1 {
+      margin: 20px 0 12px;
+      font-size: clamp(36px, 5vw, 58px);
+      line-height: 1.08;
+      letter-spacing: -2px;
+      font-weight: 900;
+    }
+
+    h1 span {
+      display: block;
+      color: #8f80ed;
+    }
+
+    .description {
+      max-width: 440px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+      font-weight: 600;
+    }
+
+    /* Robot mascot */
+    .robot-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      height: 270px;
+      margin: 14px 0;
+    }
+
+    .platform {
+      position: absolute;
+      bottom: 22px;
+      width: 210px;
+      height: 38px;
+      border-radius: 50%;
+      background: #c5b9f8;
+      box-shadow: 0 13px 0 #b2a4ec, 0 22px 30px #9991d64d;
+    }
+
+    .robot {
+      position: relative;
+      width: 154px;
+      height: 150px;
+      border-radius: 43px;
+      background: linear-gradient(145deg, #fff, #dcd6ff);
+      box-shadow: 13px 13px 25px #bcb3e6, -10px -10px 23px #ffffff;
+      animation: robotFloat 3.5s ease-in-out infinite;
+    }
+
+    @keyframes robotFloat {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-13px) rotate(2deg); }
+    }
+
+    .robot-ear {
+      position: absolute;
+      top: 49px;
+      width: 17px;
+      height: 38px;
+      border-radius: 9px;
+      background: #b6a8ff;
+    }
+
+    .robot-ear.left { left: -12px; }
+    .robot-ear.right { right: -12px; }
+
+    .robot-face {
+      position: absolute;
+      inset: 20px 17px 27px;
+      border-radius: 31px;
+      background: linear-gradient(145deg, #b5e7ff, #9abcf9);
+      box-shadow: inset 4px 4px 9px #85b7e8, inset -4px -4px 9px #d2f4ff;
+    }
+
+    .eyes {
+      position: absolute;
+      top: 24px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 23px;
+    }
+
+    .eye {
+      width: 10px;
+      height: 15px;
+      border-radius: 50%;
+      background: #45436c;
+    }
+
+    .smile {
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      width: 23px;
+      height: 11px;
+      border-bottom: 3px solid #45436c;
+      border-radius: 0 0 18px 18px;
+      transform: translateX(-50%);
+    }
+
+    .antenna {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      width: 5px;
+      height: 27px;
+      border-radius: 5px;
+      background: #a99bff;
+    }
+
+    .antenna::before {
+      content: "";
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #ffcae0;
+      top: -8px;
+      left: -5px;
+      box-shadow: 0 0 0 5px #ffcae030;
+    }
+
+    .sparkle {
+      position: absolute;
+      color: #9384ef;
+      font-size: 25px;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+
+    .sparkle.s1 { top: 35px; left: 17%; }
+    .sparkle.s2 { top: 65px; right: 13%; animation-delay: .7s; }
+    .sparkle.s3 { bottom: 48px; right: 23%; animation-delay: 1.2s; }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: .45; transform: scale(.8); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: #8984b2;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .lobby-card {
+      padding: 30px;
+      border: 1px solid #ffffffd9;
+      border-radius: 32px;
+      background: var(--white);
+      box-shadow: var(--shadow), inset 2px 2px 5px #ffffff;
+      backdrop-filter: blur(18px);
+    }
+
+    .card-label {
+      color: #9187d9;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 8px 0 6px;
+      font-size: 27px;
+      font-weight: 900;
+      letter-spacing: -.8px;
+    }
+
+    .card-subtitle {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.7;
+    }
+
+    .team-box {
+      padding: 18px;
+      border: 1px solid #fff;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #f0ebff, #e6f6ff);
+      box-shadow: inset 4px 4px 9px #d9d6ef70, inset -4px -4px 9px #ffffff;
+    }
+
+    .field-label {
+      color: #8984ad;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    #teamName {
+      margin-top: 6px;
+      overflow-wrap: anywhere;
+      font-size: 23px;
+      font-weight: 900;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      margin: 20px 0;
+      padding: 17px;
+      border-radius: 20px;
+      background: #fff9;
+    }
+
+    .status-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 42px;
+      height: 42px;
+      border-radius: 15px;
+      background: #e0d9ff;
+      font-size: 20px;
+    }
+
+    #statusTitle {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    #statusText {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.7;
+    }
+
+    .progress {
+      display: flex;
+      gap: 7px;
+      margin: 21px 0;
+    }
+
+    .progress span {
+      height: 6px;
+      flex: 1;
+      border-radius: 99px;
+      background: #e2ddf5;
+    }
+
+    .progress span:first-child {
+      background: linear-gradient(90deg, #aa9bff, #a8dfff);
+    }
+
+    .primary-btn, .secondary-btn {
+      display: block;
+      width: 100%;
+      padding: 14px 18px;
+      border: 0;
+      border-radius: 17px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 900;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .primary-btn {
+      color: white;
+      background: linear-gradient(110deg, #9d8af4, #83c9f7);
+      box-shadow: 0 8px 18px #9c9be84a;
+    }
+
+    .secondary-btn {
+      margin-top: 10px;
+      color: #7f76c4;
+      background: #ffffffb8;
+      border: 1px solid #fff;
+    }
+
+    .primary-btn:hover, .secondary-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .primary-btn:disabled {
+      cursor: wait;
+      opacity: .7;
+    }
+
+    .footer {
+      margin-top: 28px;
+      text-align: center;
+      color: #9290b0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    #notice {
+      margin-top: 12px;
+      color: #7c70be;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: min(100% - 24px, 520px);
+        padding-top: 18px;
+      }
+
+      header { margin-bottom: 12px; }
+
+      .main {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .hero {
+        padding: 18px 4px 0;
+        text-align: center;
+      }
+
+      .description {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .robot-stage {
+        height: 225px;
+        margin: 4px 0;
+      }
+
+      .lobby-card { padding: 23px; }
+      h1 { font-size: 40px; }
+      .brand { font-size: 14px; }
+      .brand-icon { width: 41px; height: 41px; }
+      .live-pill { padding: 8px 10px; font-size: 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+
+  <div class="page">
+    <header>
+      <div class="brand">
+        <div class="brand-icon">🧩</div>
+        <div>DIET <span style="color:#9283ec">CROSSWORD</span></div>
+      </div>
+
+      <div class="live-pill">
+        <span class="dot"></span>
+        LIVE LOBBY
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="hero">
+        <div class="eyebrow">✦ Event waiting room</div>
+
+        <h1>Almost <span>time to play!</span></h1>
+
+        <p class="description">
+          Your team is in the lobby. Get ready to solve clues,
+          challenge your mind, and enjoy the DIET Engineering Crossword.
+        </p>
+
+        <div class="robot-stage">
+          <span class="sparkle s1">✦</span>
+          <span class="sparkle s2">✧</span>
+          <span class="sparkle s3">✦</span>
+
+          <div class="platform"></div>
+
+          <div class="robot">
+            <div class="antenna"></div>
+            <div class="robot-ear left"></div>
+            <div class="robot-ear right"></div>
+
+            <div class="robot-face">
+              <div class="eyes">
+                <span class="eye"></span>
+                <span class="eye"></span>
+              </div>
+              <div class="smile"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hint">Your crossword adventure is loading ✨</div>
+      </section>
+
+      <section class="lobby-card">
+        <div class="card-label">✦ Team dashboard</div>
+        <h2>Your waiting room</h2>
+
+        <p class="card-subtitle">
+          You're registered! Stay on this page for live event updates.
+        </p>
+
+        <div class="team-box">
+          <div class="field-label">Your team name</div>
+          <div id="teamName">Checking your team...</div>
+        </div>
+
+        <div class="status-row">
+          <div class="status-icon" id="statusIcon">⏳</div>
+          <div>
+            <p id="statusTitle">Connecting to lobby...</p>
+            <p id="statusText">Checking your registration and event status.</p>
+          </div>
+        </div>
+
+        <div class="progress" aria-label="Event progress">
+          <span></span><span></span><span></span>
+        </div>
+
+        <button id="refreshBtn" class="primary-btn" type="button">
+          Check status ↻
+        </button>
+
+        <a href="index.html" class="secondary-btn">Back to home</a>
+        <div id="notice" role="status"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      Made for curious minds · DIET Engineering Crossword
+    </footer>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInAnonymously
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCKdwMtdNS1NeQdigvkni7XJUUNaP2VWoQ",
+      authDomain: "test-protal.firebaseapp.com",
+      projectId: "test-protal",
+      storageBucket: "test-protal.firebasestorage.app",
+      messagingSenderId: "168100330624",
+      appId: "1:168100330624:web:d9b3b1c050ce4ede7cfa65",
+      measurementId: "G-DNMJ64CY61"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const teamNameEl = document.getElementById("teamName");
+    const statusTitle = document.getElementById("statusTitle");
+    const statusText = document.getElementById("statusText");
+    const statusIcon = document.getElementById("statusIcon");
+    const notice = document.getElementById("notice");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    let stopTeamListener = null;
+    let stopEventListener = null;
+    let currentUid = null;
+    let busy = false;
+
+    function showStatus(title, message, icon = "⏳") {
+      statusTitle.textContent = title;
+      statusText.textContent = message;
+      statusIcon.textContent = icon;
+    }
+
+    function stopListeners() {
+      if (stopTeamListener) stopTeamListener();
+      if (stopEventListener) stopEventListener();
+
+      stopTeamListener = null;
+      stopEventListener = null;
+    }
+
+    function renderStatus(eventStatus) {
+      if (eventStatus === "started") {
+        showStatus(
+          "The event has started!",
+          "Opening the crossword game...",
+          "🎉"
+        );
+
+        refreshBtn.textContent = "Opening game...";
+        refreshBtn.disabled = true;
+
+        if (!window.gameRedirectStarted) {
+          window.gameRedirectStarted = true;
+          window.location.replace("game.html");
+        }
+      } else if (eventStatus === "closed") {
+        showStatus(
+          "This event has ended",
+          "The coordinator has closed the event.",
+          "🔒"
+        );
+
+        refreshBtn.textContent = "Event closed";
+        refreshBtn.disabled = true;
+      } else {
+        showStatus(
+          "You're in the waiting room",
+          "The coordinator has not started the event yet. Keep this page open.",
+          "⏳"
+        );
+
+        refreshBtn.textContent = "Check status ↻";
+        refreshBtn.disabled = false;
+      }
+    }
+
+    async function connectLobby(user) {
+      if (busy) return;
+
+      busy = true;
+      currentUid = user.uid;
+      notice.textContent = "";
+      refreshBtn.disabled = true;
+
+      try {
+        const teamRef = doc(db, "teams", user.uid);
+        const teamSnap = await getDoc(teamRef);
+
+        if (!teamSnap.exists()) {
+          teamNameEl.textContent = "Team not found";
+
+          showStatus(
+            "Registration not found",
+            "Please return to the registration page and register your team first.",
+            "🔎"
+          );
+
+          notice.textContent =
+            "If you already registered, check that registration and waiting pages use the same Firebase project and team UID.";
+
+          return;
+        }
+
+        const team = teamSnap.data();
+        teamNameEl.textContent = team.teamName || team.name || "Your team";
+
+        stopListeners();
+
+        stopTeamListener = onSnapshot(
+          teamRef,
+          snapshot => {
+            if (!snapshot.exists()) {
+              showStatus(
+                "Team not found",
+                "Please return to the registration page.",
+                "🔎"
+              );
+              return;
+            }
+
+            const data = snapshot.data();
+            teamNameEl.textContent =
+              data.teamName || data.name || "Your team";
+          },
+          error => {
+            console.error("Team listener:", error);
+            notice.textContent =
+              "Couldn't update team status. Check your Firestore rules.";
+          }
+        );
+
+        const eventRef = doc(db, "event", "current");
+
+        stopEventListener = onSnapshot(
+          eventRef,
+          snapshot => {
+            if (snapshot.exists()) {
+              const event = snapshot.data();
+              renderStatus(event.status || "waiting");
+            } else {
+              renderStatus("waiting");
+              notice.textContent =
+                'The "event/current" document was not found in Firestore.';
+            }
+          },
+          error => {
+            console.error("Event listener:", error);
+            notice.textContent =
+              "Couldn't read event status. Check your Firestore rules.";
+          }
+        );
+      } catch (error) {
+        console.error(error);
+
+        showStatus(
+          "Connection problem",
+          "We couldn't load the lobby. Check your internet and try again.",
+          "📡"
+        );
+
+        notice.textContent =
+          error.message || "Firebase connection failed.";
+      } finally {
+        busy = false;
+
+        if (!window.gameRedirectStarted) {
+          refreshBtn.disabled = false;
+        }
+      }
+    }
+
+    onAuthStateChanged(auth, async user => {
+      if (user) {
+        await connectLobby(user);
+      } else {
+        try {
+          await signInAnonymously(auth);
+        } catch (error) {
+          console.error(error);
+
+          showStatus(
+            "Unable to connect",
+            "Anonymous sign-in may not be enabled in Firebase Authentication.",
+            "⚠️"
+          );
+
+          notice.textContent =
+            error.message || "Firebase sign-in failed.";
+        }
+      }
+    });
+
+    refreshBtn.addEventListener("click", async () => {
+      const user = auth.currentUser;
+
+      if (user) {
+        await connectLobby(user);
+      }
+    });
+
+    window.addEventListener("beforeunload", stopListeners);
+  </script>
+</body>
+</html>
